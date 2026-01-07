@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 007ea11b0445d0b4faa6e00ae11d15fb, type: 3}
+  m_Name: BabyGiraffe
+  m_EditorClassIdentifier: StepPet::StepPet.Pets.AnimalData
+  animalType: 4
+  displayName: Baby Girraffe
+  description: 'I love baby giraffe
+
+'
+  dailyRequirement: 300
+  unlockGoal: 0
+  unlockDays: 14
+  icon: {fileID: 21300000, guid: 505887ddf9ca1d441a99f8b7cb40f728, type: 3}
+  sprite: {fileID: 21300000, guid: da1fe3cbaf789384c96c52a223bfc204, type: 3}
+  animatorController: {fileID: 0}
+  wanderSpeed: 1
+  wanderRadius: 3

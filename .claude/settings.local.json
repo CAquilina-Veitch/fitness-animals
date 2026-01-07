@@ -9,7 +9,9 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" repo create fitness-animals --public --source=. --push --description \"Step Pet - A virtual pet mobile app where walking earns currency to feed and collect cute baby animals\")",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(ls:*)",
+      "Bash(dir:*)"
     ]
   },
   "enabledPlugins": {
