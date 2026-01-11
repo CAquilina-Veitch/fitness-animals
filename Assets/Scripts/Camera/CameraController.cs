@@ -1,6 +1,7 @@
 using R3;
 using UnityEngine;
 using StepPet.Core;
+using StepPet.Pets;
 
 namespace StepPet.Camera
 {
@@ -115,19 +116,16 @@ namespace StepPet.Camera
 
         private void ZoomToPetById(string petId)
         {
-            // Find the pet GameObject by ID
-            // This requires pets to have an IPetIdentifier component
-            var pets = FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
-            foreach (var pet in pets)
+            if (MainPetAreaManager.Instance != null)
             {
-                if (pet is StepPet.Input.IPetIdentifier identifier && identifier.PetId == petId)
+                var petTransform = MainPetAreaManager.Instance.GetPetTransform(petId);
+                if (petTransform != null)
                 {
-                    CameraManager.Instance?.ZoomToPet(pet.transform);
+                    CameraManager.Instance?.ZoomToPet(petTransform);
                     return;
                 }
             }
 
-            // Pet not found - log warning in debug
             Debug.LogWarning($"[CameraController] Could not find pet with ID: {petId}");
         }
 

@@ -175,13 +175,11 @@ namespace StepPet.Input
                 {
                     Log($"SWIPE RIGHT (delta: {swipeDelta.magnitude:F0}px)");
                     _onSwipeRight.OnNext(endPosition);
-                    HandleSwipeRightNavigation();
                 }
                 else
                 {
                     Log($"SWIPE LEFT (delta: {swipeDelta.magnitude:F0}px)");
                     _onSwipeLeft.OnNext(endPosition);
-                    HandleSwipeLeftNavigation();
                 }
             }
             else if (isVertical)
@@ -190,111 +188,17 @@ namespace StepPet.Input
                 {
                     Log($"SWIPE UP (delta: {swipeDelta.magnitude:F0}px)");
                     _onSwipeUp.OnNext(endPosition);
-                    HandleSwipeUpNavigation();
                 }
                 else
                 {
                     Log($"SWIPE DOWN (delta: {swipeDelta.magnitude:F0}px)");
                     _onSwipeDown.OnNext(endPosition);
-                    HandleSwipeDownNavigation();
                 }
             }
             else
-            {
                 Log($"Swipe ignored - not horizontal or vertical enough (dir: {direction})");
-            }
         }
-
-        private void HandleSwipeLeftNavigation()
-        {
-            var uiManager = UIManager.Instance;
-            if (uiManager == null) return;
-
-            var currentPage = uiManager.CurrentPage.Value;
-
-            switch (currentPage)
-            {
-                case UIPage.SceneOverview:
-                    // Swipe left from Scene Overview -> Friends List
-                    uiManager.SetPage(UIPage.FriendsList);
-                    break;
-
-                case UIPage.PetCloseup:
-                    // Swipe left from Pet Closeup -> ALWAYS back to Scene Overview
-                    // (per design doc: "Swipe LEFT → Always returns to Scene Overview")
-                    uiManager.SetPage(UIPage.SceneOverview);
-                    break;
-
-                case UIPage.FriendsList:
-                    // Already at leftmost screen, do nothing
-                    break;
-            }
-        }
-
-        private void HandleSwipeRightNavigation()
-        {
-            var uiManager = UIManager.Instance;
-            if (uiManager == null) return;
-
-            var currentPage = uiManager.CurrentPage.Value;
-
-            switch (currentPage)
-            {
-                case UIPage.FriendsList:
-                    // Swipe right from Friends List -> Scene Overview
-                    uiManager.SetPage(UIPage.SceneOverview);
-                    break;
-
-                case UIPage.SceneOverview:
-                    // Swipe right from Scene Overview -> Pet Closeup (first or last viewed)
-                    NavigateToPetCloseup();
-                    break;
-
-                case UIPage.PetCloseup:
-                    // Swipe right from Pet Closeup -> Next pet
-                    uiManager.NavigateToNextPet();
-                    break;
-            }
-        }
-
-        private void HandleSwipeUpNavigation()
-        {
-            var uiManager = UIManager.Instance;
-            if (uiManager == null) return;
-
-            // Swipe up opens bottom menu
-            uiManager.SetBottomMenuExpanded(true);
-        }
-
-        private void HandleSwipeDownNavigation()
-        {
-            var uiManager = UIManager.Instance;
-            if (uiManager == null) return;
-
-            // Swipe down closes bottom menu
-            uiManager.SetBottomMenuExpanded(false);
-        }
-
-        private void NavigateToPetCloseup()
-        {
-            var uiManager = UIManager.Instance;
-            if (uiManager == null) return;
-
-            var pets = uiManager.PetOrder.Value;
-            if (pets == null || pets.Length == 0) return;
-
-            // If there was a previously focused pet, go to that one
-            // Otherwise go to the first pet
-            var lastFocused = uiManager.FocusedPetId.Value;
-            if (!string.IsNullOrEmpty(lastFocused) && Array.IndexOf(pets, lastFocused) >= 0)
-            {
-                uiManager.FocusPet(lastFocused);
-            }
-            else
-            {
-                uiManager.FocusPet(pets[0]);
-            }
-        }
+        
 
         private void TrySelectPetAtPosition(Vector2 screenPosition)
         {

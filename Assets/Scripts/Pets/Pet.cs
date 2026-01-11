@@ -60,8 +60,16 @@ namespace StepPet.Pets
                 LinkToPetInstance(instanceId);
             }
 
+            // Register with MainPetAreaManager
+            MainPetAreaManager.Instance?.RegisterPet(this);
+
             // Start with a random wait time
             _waitTimer = Random.Range(minWaitTime, maxWaitTime);
+        }
+
+        private void OnDestroy()
+        {
+            MainPetAreaManager.Instance?.UnregisterPet(this);
         }
 
         private void Update()

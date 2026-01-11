@@ -1,3 +1,4 @@
+using System;
 using R3;
 using UnityEngine;
 
@@ -46,10 +47,8 @@ namespace StepPet.Core
 
         private void OnDestroy()
         {
-            if (Instance == this)
-            {
+            if (Instance == this) 
                 Instance = null;
-            }
 
             CurrentPage.Dispose();
             FocusedPetId.Dispose();
@@ -81,6 +80,22 @@ namespace StepPet.Core
             Log($"Page: {previousPage} → {page}");
         }
 
+        public void NavigateToPetCloseup()
+        {
+            var pets = PetOrder.CurrentValue;
+            // If there was a previously focused pet, go to that one
+            // Otherwise go to the first pet
+            var lastFocused = FocusedPetId.Value;
+            if (!string.IsNullOrEmpty(lastFocused) && Array.IndexOf(pets, lastFocused) >= 0)
+            {
+                FocusPet(lastFocused);
+            }
+            else
+            {
+                FocusPet(pets[0]);
+            }
+        }
+        
         /// <summary>
         /// Focus on a specific pet (navigates to PetCloseup)
         /// </summary>
@@ -175,10 +190,9 @@ namespace StepPet.Core
                 Log($"NavigateToPreviousPet: Already at first pet");
             }
         }
+        
+        
 
-        /// <summary>
-        /// Update the list of pets for navigation order
-        /// </summary>
         public void SetPetOrder(string[] petIds)
         {
             PetOrder.Value = petIds ?? System.Array.Empty<string>();
@@ -187,10 +201,8 @@ namespace StepPet.Core
 
         private void Log(string message)
         {
-            if (enableDebugLogs)
-            {
+            if (enableDebugLogs) 
                 Debug.Log($"[UIManager] {message}");
-            }
         }
     }
 }
