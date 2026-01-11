@@ -13,8 +13,8 @@ namespace StepPet.UI.Views
     {
         [Header("Animation Settings")]
         [SerializeField] private float slideSpeed = 10f;
-        [SerializeField] private float collapsedYOffset = -500f; // How much to hide when collapsed
-        [SerializeField] private float handleVisibleHeight = 60f; // Height of visible handle when collapsed
+        [SerializeField] private float collapsedYPos = -500f; // How much to hide when collapsed
+        [SerializeField] private float expandedYPos = 0f; // How much to hide when collapsed
 
         [Header("References")]
         [SerializeField] private RectTransform panelTransform;
@@ -24,8 +24,6 @@ namespace StepPet.UI.Views
         [SerializeField] private GameObject expenditureContent; // Shown on PetCloseup
         [SerializeField] private GameObject shopContent; // Shown on SceneOverview
 
-        private Vector2 _expandedPosition;
-        private Vector2 _collapsedPosition;
         private bool _isExpanded;
         private UIPage _currentPage;
         private CompositeDisposable _disposables;
@@ -33,19 +31,6 @@ namespace StepPet.UI.Views
         private void Awake()
         {
             _disposables = new CompositeDisposable();
-
-            if (panelTransform == null)
-                panelTransform = GetComponent<RectTransform>();
-
-            // Store positions
-            if (panelTransform != null)
-            {
-                _expandedPosition = panelTransform.anchoredPosition;
-                _collapsedPosition = new Vector2(
-                    _expandedPosition.x,
-                    _expandedPosition.y + collapsedYOffset + handleVisibleHeight
-                );
-            }
         }
 
         private void Start()
@@ -105,15 +90,13 @@ namespace StepPet.UI.Views
 
         private void Update()
         {
-            if (panelTransform == null) return;
-
             // Hide completely when on Friends List
             bool shouldBeVisible = _currentPage != UIPage.FriendsList;
 
             if (!shouldBeVisible)
             {
                 // Slide completely off screen
-                Vector2 hiddenPosition = new Vector2(_expandedPosition.x, _expandedPosition.y + collapsedYOffset);
+                Vector2 hiddenPosition = new Vector2(0, expandedYPos);
                 panelTransform.anchoredPosition = Vector2.Lerp(
                     panelTransform.anchoredPosition,
                     hiddenPosition,
@@ -123,33 +106,22 @@ namespace StepPet.UI.Views
             }
 
             // Smoothly slide the panel
-            Vector2 targetPosition = _isExpanded ? _expandedPosition : _collapsedPosition;
             panelTransform.anchoredPosition = Vector2.Lerp(
                 panelTransform.anchoredPosition,
-                targetPosition,
+                new Vector2(0, _isExpanded? expandedYPos : collapsedYPos),
                 Time.deltaTime * slideSpeed
             );
 
-            // Update content interactability
-            if (contentCanvasGroup != null)
-            {
-                contentCanvasGroup.interactable = _isExpanded;
-                contentCanvasGroup.blocksRaycasts = _isExpanded;
-            }
+            contentCanvasGroup.interactable = _isExpanded;
+            contentCanvasGroup.blocksRaycasts = _isExpanded;
         }
 
         private void SetCollapsedImmediate()
         {
             _isExpanded = false;
-            if (panelTransform != null)
-            {
-                panelTransform.anchoredPosition = _collapsedPosition;
-            }
-            if (contentCanvasGroup != null)
-            {
-                contentCanvasGroup.interactable = false;
-                contentCanvasGroup.blocksRaycasts = false;
-            }
+            panelTransform.anchoredPosition = new Vector2(0, collapsedYPos);
+            contentCanvasGroup.interactable = false;
+            contentCanvasGroup.blocksRaycasts = false;
         }
 
         /// <summary>

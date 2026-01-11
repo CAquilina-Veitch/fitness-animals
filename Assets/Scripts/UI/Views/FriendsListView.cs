@@ -13,6 +13,7 @@ namespace StepPet.UI.Views
         [Header("Animation Settings")]
         [SerializeField] private float slideSpeed = 8f;
         [SerializeField] private float hiddenXOffset = -400f; // Offset when hidden (off-screen left)
+        [SerializeField] private float shownXOffset = 0; // Offset when hidden (off-screen left)
 
         [Header("References")]
         [SerializeField] private RectTransform panelTransform;
@@ -27,29 +28,15 @@ namespace StepPet.UI.Views
         {
             _disposables = new CompositeDisposable();
 
-            if (panelTransform == null)
-                panelTransform = GetComponent<RectTransform>();
-
-            if (canvasGroup == null)
-                canvasGroup = GetComponent<CanvasGroup>();
-
-            // Store the shown position (current position in editor)
-            if (panelTransform != null)
-            {
-                _shownPosition = panelTransform.anchoredPosition;
-                _hiddenPosition = new Vector2(_shownPosition.x + hiddenXOffset, _shownPosition.y);
-            }
+            _shownPosition = panelTransform.anchoredPosition;
+            _hiddenPosition = new Vector2(_shownPosition.x + hiddenXOffset, _shownPosition.y);
         }
 
         private void Start()
         {
-            // Subscribe to UIManager
-            if (UIManager.Instance != null)
-            {
-                UIManager.Instance.CurrentPage
-                    .Subscribe(OnPageChanged)
-                    .AddTo(_disposables);
-            }
+            UIManager.Instance.CurrentPage
+                .Subscribe(OnPageChanged)
+                .AddTo(_disposables);
 
             // Start hidden
             SetHiddenImmediate();
