@@ -12,7 +12,9 @@
       "Bash(cat:*)",
       "Bash(ls:*)",
       "Bash(dir:*)",
-      "mcp__ide__getDiagnostics"
+      "mcp__ide__getDiagnostics",
+      "Bash(echo:*)",
+      "Skill(frontend-design)"
     ]
   },
   "enabledPlugins": {

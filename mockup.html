@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Step Pet</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Fredoka+One&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --pink-light: #FFD6E0;
+      --pink-medium: #FFB5C5;
+      --pink-dark: #FF8FA3;
+      --mint-light: #C1F0DC;
+      --mint-medium: #98D8C8;
+      --mint-dark: #6BC4B0;
+      --yellow-light: #FFF4CC;
+      --yellow-medium: #FFE082;
+      --yellow-dark: #FFD54F;
+      --lavender-light: #E8D5FF;
+      --lavender-medium: #D4B5FF;
+      --peach: #FFCBA4;
+      --cream: #FFF9F0;
+      --cream-dark: #FFF0E0;
+      --brown-dark: #5D4E37;
+      --brown-medium: #8B7355;
+      --brown-light: #A89070;
+      --sky-blue: #B5E5F5;
+      --grass-green: #A8E6A3;
+      --grass-dark: #7BC97A;
+      --shadow: rgba(93, 78, 55, 0.15);
+      --shadow-dark: rgba(93, 78, 55, 0.25);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      touch-action: pan-x;
+    }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: transparent;
+    }
+
+    /* App Container */
+    .app {
+      width: 100%;
+      height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Screen Container */
+    .screens-container {
+      width: 300%;
+      height: 100%;
+      display: flex;
+      transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .screens-container[data-screen="0"] { transform: translateX(0); }
+    .screens-container[data-screen="1"] { transform: translateX(-33.333%); }
+    .screens-container[data-screen="2"] { transform: translateX(-66.666%); }
+
+    .screen {
+      width: 33.333%;
+      height: 100%;
+      flex-shrink: 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Navigation Dots */
+    .nav-dots {
+      position: absolute;
+      bottom: max(20px, env(safe-area-inset-bottom));
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 10px;
+      z-index: 50;
+      background: rgba(255,255,255,0.9);
+      padding: 8px 16px;
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+    }
+
+    .nav-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--brown-light);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .nav-dot.active {
+      background: var(--pink-dark);
+      transform: scale(1.3);
+    }
+
+    /* Top UI Bar */
+    .top-bar {
+      position: absolute;
+      top: max(16px, env(safe-area-inset-top));
+      left: 16px;
+      right: 16px;
+      z-index: 40;
+    }
+
+    .daily-quota-bar {
+      background: rgba(255,255,255,0.95);
+      border-radius: 20px;
+      padding: 12px 16px;
+      box-shadow: 0 4px 20px var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .quota-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .quota-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: 14px;
+      color: var(--brown-dark);
+    }
+
+    .quota-numbers {
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--mint-dark);
+    }
+
+    .quota-track {
+      height: 16px;
+      background: var(--cream-dark);
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .quota-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--mint-medium), var(--mint-dark));
+      border-radius: 10px;
+      width: 100%;
+      position: relative;
+    }
+
+    .quota-fill::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 50%;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.4), transparent);
+      border-radius: 10px 10px 0 0;
+    }
+
+    .quota-complete-badge {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 10px;
+      background: #4CAF50;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 8px;
+      font-weight: 700;
+    }
+
+    /* Wallet */
+    .wallet {
+      position: absolute;
+      top: max(16px, env(safe-area-inset-top));
+      right: 16px;
+      background: linear-gradient(135deg, var(--yellow-light), var(--yellow-medium));
+      padding: 10px 16px;
+      border-radius: 20px;
+      box-shadow: 0 4px 15px var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 41;
+    }
+
+    .wallet-icon { font-size: 20px; }
+
+    .wallet-amount {
+      font-family: 'Fredoka One', cursive;
+      font-size: 16px;
+      color: var(--brown-dark);
+    }
+
+    /* ========== SCREEN 1: FRIENDS ========== */
+    .friends-list {
+      background: linear-gradient(180deg, var(--lavender-light) 0%, var(--pink-light) 100%);
+    }
+
+    .friends-header {
+      padding: calc(max(20px, env(safe-area-inset-top)) + 20px) 20px 20px;
+      text-align: center;
+    }
+
+    .friends-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: 28px;
+      color: var(--brown-dark);
+    }
+
+    .friends-subtitle {
+      color: var(--brown-medium);
+      font-size: 14px;
+    }
+
+    .settings-btn {
+      position: absolute;
+      top: calc(max(16px, env(safe-area-inset-top)) + 10px);
+      right: 20px;
+      width: 44px;
+      height: 44px;
+      background: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 4px 15px var(--shadow);
+      cursor: pointer;
+    }
+
+    .friends-container {
+      padding: 10px 20px;
+      height: calc(100% - 220px);
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .friend-card {
+      background: white;
+      border-radius: 20px;
+      padding: 16px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 4px 15px var(--shadow);
+    }
+
+    .friend-avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--mint-light), var(--mint-medium));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      flex-shrink: 0;
+    }
+
+    .friend-info { flex: 1; }
+
+    .friend-name {
+      font-family: 'Fredoka One', cursive;
+      font-size: 16px;
+      color: var(--brown-dark);
+    }
+
+    .friend-status {
+      font-size: 12px;
+      color: var(--brown-light);
+    }
+
+    .visit-btn {
+      background: linear-gradient(135deg, var(--pink-medium), var(--pink-dark));
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 15px;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      font-size: 12px;
+    }
+
+    .add-friend-btn {
+      background: linear-gradient(135deg, var(--mint-medium), var(--mint-dark));
+      color: white;
+      border: none;
+      padding: 16px 32px;
+      border-radius: 25px;
+      font-family: 'Fredoka One', cursive;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 20px auto;
+      box-shadow: 0 4px 20px rgba(152, 216, 200, 0.4);
+    }
+
+    /* ========== SCREEN 2: SCENE OVERVIEW ========== */
+    /* Transparent - Unity renders the scene behind */
+    .scene-overview {
+      background: transparent;
+    }
+
+    /* ========== SCREEN 3: PET CLOSE-UP ========== */
+    /* Transparent - Unity renders the pet behind */
+    .pet-closeup {
+      background: transparent;
+    }
+
+    /* ========== BOTTOM MENU ========== */
+    .bottom-menu {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      border-radius: 30px 30px 0 0;
+      box-shadow: 0 -4px 30px var(--shadow);
+      z-index: 60;
+      transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      transform: translateY(calc(100% - 90px));
+      max-height: 85vh;
+    }
+
+    .bottom-menu.expanded {
+      transform: translateY(0);
+    }
+
+    .menu-handle-area {
+      padding: 20px;
+      cursor: pointer;
+      touch-action: none;
+    }
+
+    .menu-handle {
+      width: 40px;
+      height: 5px;
+      background: var(--brown-light);
+      border-radius: 3px;
+      margin: 0 auto 12px;
+    }
+
+    .menu-header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .menu-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: 20px;
+      color: var(--brown-dark);
+    }
+
+    .menu-content {
+      padding: 0 20px calc(max(20px, env(safe-area-inset-bottom)) + 80px);
+      max-height: calc(85vh - 80px);
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Menu Sections */
+    .section-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: 14px;
+      color: var(--brown-medium);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .expenditure-section { margin-bottom: 24px; }
+
+    .total-card {
+      background: var(--mint-light);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 16px;
+      text-align: center;
+      font-family: 'Fredoka One', cursive;
+      font-size: 18px;
+      color: var(--brown-dark);
+    }
+
+    .pet-requirement-card {
+      background: var(--cream);
+      border-radius: 16px;
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 10px;
+    }
+
+    .pet-mini-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--pink-light), var(--peach));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    .pet-req-info { flex: 1; }
+    .pet-req-name { font-weight: 700; color: var(--brown-dark); font-size: 14px; }
+    .pet-req-amount { font-size: 12px; color: var(--brown-medium); }
+
+    /* Unlock Progress Card */
+    .unlock-card {
+      background: linear-gradient(135deg, var(--yellow-light), var(--peach));
+      border-radius: 20px;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+
+    .unlock-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .unlock-avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      box-shadow: 0 4px 15px var(--shadow);
+    }
+
+    .unlock-info h4 {
+      font-family: 'Fredoka One', cursive;
+      color: var(--brown-dark);
+      font-size: 16px;
+    }
+
+    .unlock-status {
+      font-size: 12px;
+      color: var(--brown-medium);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #4CAF50;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .unlock-progress { margin-bottom: 10px; }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--brown-dark);
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .progress-track {
+      height: 12px;
+      background: white;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--mint-medium), #4CAF50);
+      border-radius: 6px;
+      width: 55%;
+    }
+
+    .time-remaining {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--brown-medium);
+    }
+
+    .abandon-btn {
+      background: transparent;
+      border: 2px solid var(--pink-dark);
+      color: var(--pink-dark);
+      padding: 8px 16px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-top: 12px;
+    }
+
+    /* Shop Grid */
+    .shop-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .shop-item {
+      background: var(--cream);
+      border-radius: 16px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .shop-item-icon { font-size: 32px; margin-bottom: 8px; }
+    .shop-item-name { font-size: 11px; font-weight: 700; color: var(--brown-dark); margin-bottom: 4px; }
+    .shop-item-price { font-size: 10px; color: var(--brown-medium); display: flex; align-items: center; justify-content: center; gap: 4px; }
+    .shop-item.owned { opacity: 0.7; }
+
+    .owned-badge {
+      background: var(--mint-medium);
+      color: white;
+      font-size: 8px;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-weight: 700;
+    }
+
+    .challenge-card {
+      background: linear-gradient(135deg, var(--lavender-light), var(--pink-light));
+      border-radius: 16px;
+      padding: 14px;
+      text-align: center;
+      position: relative;
+    }
+
+    .challenge-card.cooldown { opacity: 0.6; }
+
+    .cooldown-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: var(--pink-dark);
+      color: white;
+      font-size: 8px;
+      padding: 3px 6px;
+      border-radius: 6px;
+      font-weight: 700;
+    }
+
+    .challenge-goal {
+      font-size: 10px;
+      color: var(--brown-medium);
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="screens-container" data-screen="1">
+
+      <!-- SCREEN 1: FRIENDS LIST -->
+      <div class="screen friends-list">
+        <div class="friends-header">
+          <div class="friends-title">Friends</div>
+          <div class="friends-subtitle">Visit and share with friends</div>
+        </div>
+        <div class="settings-btn">⚙</div>
+
+        <div class="friends-container">
+          <div class="friend-card">
+            <div class="friend-avatar">🐱</div>
+            <div class="friend-info">
+              <div class="friend-name">SunnyWalker</div>
+              <div class="friend-status">12,450 steps today</div>
+            </div>
+            <button class="visit-btn">Visit</button>
+          </div>
+
+          <div class="friend-card">
+            <div class="friend-avatar">🐶</div>
+            <div class="friend-info">
+              <div class="friend-name">PuppyLover99</div>
+              <div class="friend-status">8,230 steps today</div>
+            </div>
+            <button class="visit-btn">Visit</button>
+          </div>
+
+          <div class="friend-card">
+            <div class="friend-avatar">🐰</div>
+            <div class="friend-info">
+              <div class="friend-name">BunnyHops</div>
+              <div class="friend-status">15,892 steps today</div>
+            </div>
+            <button class="visit-btn">Visit</button>
+          </div>
+
+          <div class="friend-card">
+            <div class="friend-avatar">🐼</div>
+            <div class="friend-info">
+              <div class="friend-name">ChillPanda</div>
+              <div class="friend-status">3,100 steps today</div>
+            </div>
+            <button class="visit-btn">Visit</button>
+          </div>
+        </div>
+
+        <button class="add-friend-btn">
+          <span>+</span> Add Friend
+        </button>
+      </div>
+
+      <!-- SCREEN 2: SCENE OVERVIEW -->
+      <!-- Unity renders scene/pets behind this UI overlay -->
+      <div class="screen scene-overview">
+        <div class="top-bar">
+          <div class="daily-quota-bar">
+            <div class="quota-label">
+              <span class="quota-title">Daily Food</span>
+              <span class="quota-numbers">3,847 / 1,000</span>
+            </div>
+            <div class="quota-track">
+              <div class="quota-fill">
+                <span class="quota-complete-badge">COMPLETE!</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="wallet">
+          <span class="wallet-icon">🍖</span>
+          <span class="wallet-amount">2,847</span>
+        </div>
+
+        <!-- Bottom Menu: Shop -->
+        <div class="bottom-menu" id="sceneMenu">
+          <div class="menu-handle-area" data-menu="sceneMenu">
+            <div class="menu-handle"></div>
+            <div class="menu-header">
+              <span class="menu-title">Shop</span>
+            </div>
+          </div>
+          <div class="menu-content">
+            <div class="section-title">Hats & Accessories</div>
+            <div class="shop-grid">
+              <div class="shop-item">
+                <div class="shop-item-icon">🎩</div>
+                <div class="shop-item-name">Top Hat</div>
+                <div class="shop-item-price">🍖 500</div>
+              </div>
+              <div class="shop-item owned">
+                <div class="shop-item-icon">🎀</div>
+                <div class="shop-item-name">Party Hat</div>
+                <span class="owned-badge">OWNED</span>
+              </div>
+              <div class="shop-item">
+                <div class="shop-item-icon">👑</div>
+                <div class="shop-item-name">Crown</div>
+                <div class="shop-item-price">🍖 800</div>
+              </div>
+              <div class="shop-item">
+                <div class="shop-item-icon">😎</div>
+                <div class="shop-item-name">Sunglasses</div>
+                <div class="shop-item-price">🍖 350</div>
+              </div>
+              <div class="shop-item">
+                <div class="shop-item-icon">🌸</div>
+                <div class="shop-item-name">Flower</div>
+                <div class="shop-item-price">🍖 400</div>
+              </div>
+              <div class="shop-item">
+                <div class="shop-item-icon">🎀</div>
+                <div class="shop-item-name">Bow</div>
+                <div class="shop-item-price">🍖 300</div>
+              </div>
+            </div>
+
+            <div class="section-title">Backdrops</div>
+            <div class="shop-grid">
+              <div class="shop-item owned">
+                <div class="shop-item-icon">🌱</div>
+                <div class="shop-item-name">Sunny Field</div>
+                <span class="owned-badge">EQUIPPED</span>
+              </div>
+              <div class="shop-item">
+                <div class="shop-item-icon">🌲</div>
+                <div class="shop-item-name">Forest</div>
+                <div class="shop-item-price">🍖 1,000</div>
+              </div>
+              <div class="shop-item">
+                <div class="shop-item-icon">🏖</div>
+                <div class="shop-item-name">Beach</div>
+                <div class="shop-item-price">🍖 1,500</div>
+              </div>
+            </div>
+
+            <div class="section-title">New Animal Challenges</div>
+            <div class="shop-grid">
+              <div class="challenge-card owned">
+                <div class="shop-item-icon">🐶</div>
+                <div class="shop-item-name">Puppy</div>
+                <span class="owned-badge">OWNED</span>
+              </div>
+              <div class="challenge-card owned">
+                <div class="shop-item-icon">🐰</div>
+                <div class="shop-item-name">Bunny</div>
+                <span class="owned-badge">OWNED</span>
+              </div>
+              <div class="challenge-card">
+                <div class="shop-item-icon">🦒</div>
+                <div class="shop-item-name">Giraffe</div>
+                <div class="challenge-goal">15,000 / 14 days</div>
+                <div class="shop-item-price" style="color: var(--mint-dark); margin-top: 4px;">IN PROGRESS</div>
+              </div>
+              <div class="challenge-card">
+                <div class="shop-item-icon">🐧</div>
+                <div class="shop-item-name">Penguin</div>
+                <div class="challenge-goal">25,000 / 14 days</div>
+              </div>
+              <div class="challenge-card cooldown">
+                <span class="cooldown-badge">12 days</span>
+                <div class="shop-item-icon">🐼</div>
+                <div class="shop-item-name">Panda</div>
+                <div class="challenge-goal">2,100 banked</div>
+              </div>
+              <div class="challenge-card">
+                <div class="shop-item-icon">🐘</div>
+                <div class="shop-item-name">Elephant</div>
+                <div class="challenge-goal">20,000 / 14 days</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCREEN 3: PET CLOSE-UP -->
+      <!-- Unity renders pet behind this UI overlay -->
+      <div class="screen pet-closeup">
+        <div class="top-bar">
+          <div class="daily-quota-bar">
+            <div class="quota-label">
+              <span class="quota-title">Daily Food</span>
+              <span class="quota-numbers">3,847 / 1,000</span>
+            </div>
+            <div class="quota-track">
+              <div class="quota-fill">
+                <span class="quota-complete-badge">COMPLETE!</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="wallet">
+          <span class="wallet-icon">🍖</span>
+          <span class="wallet-amount">2,847</span>
+        </div>
+
+        <!-- Bottom Menu: Expenditure -->
+        <div class="bottom-menu" id="petMenu">
+          <div class="menu-handle-area" data-menu="petMenu">
+            <div class="menu-handle"></div>
+            <div class="menu-header">
+              <span class="menu-title">My Pets</span>
+            </div>
+          </div>
+          <div class="menu-content">
+            <div class="expenditure-section">
+              <div class="section-title">Daily Requirements</div>
+              <div class="total-card">Total: 1,000 food/day</div>
+
+              <div class="pet-requirement-card">
+                <div class="pet-mini-avatar">🐶</div>
+                <div class="pet-req-info">
+                  <div class="pet-req-name">Biscuit</div>
+                  <div class="pet-req-amount">300 food/day</div>
+                </div>
+              </div>
+
+              <div class="pet-requirement-card">
+                <div class="pet-mini-avatar" style="background: linear-gradient(135deg, var(--mint-light), var(--mint-medium));">🐰</div>
+                <div class="pet-req-info">
+                  <div class="pet-req-name">Hopper</div>
+                  <div class="pet-req-amount">400 food/day</div>
+                </div>
+              </div>
+
+              <div class="pet-requirement-card">
+                <div class="pet-mini-avatar" style="background: linear-gradient(135deg, var(--yellow-light), var(--yellow-medium));">🐥</div>
+                <div class="pet-req-info">
+                  <div class="pet-req-name">Waddles</div>
+                  <div class="pet-req-amount">300 food/day</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="expenditure-section">
+              <div class="section-title">Unlock in Progress</div>
+              <div class="unlock-card">
+                <div class="unlock-header">
+                  <div class="unlock-avatar">🦒</div>
+                  <div class="unlock-info">
+                    <h4>Baby Giraffe</h4>
+                    <div class="unlock-status">
+                      <span class="status-dot"></span>
+                      In Progress
+                    </div>
+                  </div>
+                </div>
+                <div class="unlock-progress">
+                  <div class="progress-label">
+                    <span>8,234 / 15,000 steps</span>
+                    <span>55%</span>
+                  </div>
+                  <div class="progress-track">
+                    <div class="progress-fill"></div>
+                  </div>
+                </div>
+                <div class="time-remaining">
+                  <span>⏱</span>
+                  <span>9 days remaining</span>
+                </div>
+                <button class="abandon-btn">Abandon Challenge</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Dots -->
+    <div class="nav-dots">
+      <div class="nav-dot" data-screen="0" onclick="goToScreen(0)"></div>
+      <div class="nav-dot active" data-screen="1" onclick="goToScreen(1)"></div>
+      <div class="nav-dot" data-screen="2" onclick="goToScreen(2)"></div>
+    </div>
+  </div>
+
+  <script>
+    // Screen navigation
+    function goToScreen(index) {
+      const container = document.querySelector('.screens-container');
+      container.setAttribute('data-screen', index);
+
+      document.querySelectorAll('.nav-dot').forEach((dot, i) => {
+        dot.classList.toggle('active', i === index);
+      });
+
+      // Close any open menus
+      document.querySelectorAll('.bottom-menu').forEach(menu => {
+        menu.classList.remove('expanded');
+      });
+    }
+
+    // Menu toggle
+    function toggleMenu(menuId) {
+      const menu = document.getElementById(menuId);
+      menu.classList.toggle('expanded');
+    }
+
+    // Menu handle tap & swipe
+    document.querySelectorAll('.menu-handle-area').forEach(area => {
+      let startY = 0;
+      let startTime = 0;
+
+      area.addEventListener('touchstart', e => {
+        startY = e.touches[0].clientY;
+        startTime = Date.now();
+      }, { passive: true });
+
+      area.addEventListener('touchend', e => {
+        const endY = e.changedTouches[0].clientY;
+        const diffY = startY - endY;
+        const elapsed = Date.now() - startTime;
+        const menuId = area.dataset.menu;
+        const menu = document.getElementById(menuId);
+
+        // Swipe up to expand, swipe down to collapse
+        if (Math.abs(diffY) > 30) {
+          if (diffY > 0) {
+            menu.classList.add('expanded');
+          } else {
+            menu.classList.remove('expanded');
+          }
+        } else if (elapsed < 300) {
+          // Quick tap toggles
+          menu.classList.toggle('expanded');
+        }
+      }, { passive: true });
+
+      // Mouse support
+      area.addEventListener('click', () => {
+        const menuId = area.dataset.menu;
+        toggleMenu(menuId);
+      });
+    });
+
+    // Horizontal swipe for screens
+    let touchStartX = 0;
+    let touchStartY = 0;
+
+    document.querySelector('.screens-container').addEventListener('touchstart', e => {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+
+    document.querySelector('.screens-container').addEventListener('touchend', e => {
+      const touchEndX = e.changedTouches[0].clientX;
+      const touchEndY = e.changedTouches[0].clientY;
+      const diffX = touchStartX - touchEndX;
+      const diffY = touchStartY - touchEndY;
+
+      // Only handle horizontal swipes (ignore vertical)
+      if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+        const container = document.querySelector('.screens-container');
+        const currentScreen = parseInt(container.getAttribute('data-screen'));
+
+        if (diffX > 0 && currentScreen < 2) {
+          goToScreen(currentScreen + 1);
+        } else if (diffX < 0 && currentScreen > 0) {
+          goToScreen(currentScreen - 1);
+        }
+      }
+    }, { passive: true });
+  </script>
+</body>
+</html>

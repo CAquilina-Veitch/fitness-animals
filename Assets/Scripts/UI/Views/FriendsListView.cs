@@ -12,24 +12,49 @@ namespace StepPet.UI.Views
     {
         [Header("Animation Settings")]
         [SerializeField] private float slideSpeed = 8f;
-        [SerializeField] private float hiddenXOffset = -400f; // Offset when hidden (off-screen left)
-        [SerializeField] private float shownXOffset = 0; // Offset when hidden (off-screen left)
+        [SerializeField] private MinMax normalizedX = new MinMax { min = -1f, max = 0f }; // min = hidden, max = shown (-1 = left edge, 0 = center, 1 = right edge)
 
         [Header("References")]
         [SerializeField] private RectTransform panelTransform;
         [SerializeField] private CanvasGroup canvasGroup;
+        [SerializeField] private Canvas rootCanvas;
 
         private Vector2 _shownPosition;
         private Vector2 _hiddenPosition;
         private bool _isShown;
         private CompositeDisposable _disposables;
+        private float _canvasWidth;
 
         private void Awake()
         {
             _disposables = new CompositeDisposable();
 
-            _shownPosition = panelTransform.anchoredPosition;
-            _hiddenPosition = new Vector2(_shownPosition.x + hiddenXOffset, _shownPosition.y);
+            // Get canvas width for normalized position calculations
+            if (rootCanvas != null)
+            {
+                RectTransform canvasRect = rootCanvas.GetComponent<RectTransform>();
+                _canvasWidth = canvasRect.rect.width;
+            }
+            else
+            {
+                // Fallback: try to find canvas in parent hierarchy
+                Canvas canvas = GetComponentInParent<Canvas>();
+                if (canvas != null)
+                {
+                    RectTransform canvasRect = canvas.GetComponent<RectTransform>();
+                    _canvasWidth = canvasRect.rect.width;
+                }
+                else
+                {
+                    _canvasWidth = Screen.width;
+                }
+            }
+
+            // Calculate positions from normalized values (assumes center anchor)
+            // -1 = one screen width left, 0 = center, 1 = one screen width right
+            float baseY = panelTransform.anchoredPosition.y;
+            _shownPosition = new Vector2(normalizedX.max * _canvasWidth, baseY);
+            _hiddenPosition = new Vector2(normalizedX.min * _canvasWidth, baseY);
         }
 
         private void Start()
@@ -50,11 +75,7 @@ namespace StepPet.UI.Views
         private void OnPageChanged(UIPage page)
         {
             bool shouldShow = page == UIPage.FriendsList;
-
-            if (shouldShow != _isShown)
-            {
-                _isShown = shouldShow;
-            }
+            _isShown = shouldShow;
         }
 
         private void Update()
